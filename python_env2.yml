@@ -1,0 +1,24 @@
+name: surrogate_bandit
+channels:
+  - mosek
+  - gurobi
+  - anaconda
+  - conda-forge
+  - https://conda.anaconda.org/gurobi
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=1_gnu
+  - argon2-cffi=21.3.0=pyhd3eb1b0_0
+  - argon2-cffi-bindings=21.2.0=py310h7f8727e_0
+  - asttokens=2.0.5=pyhd3eb1b0_0
+  - pip=21.2.4=py310h06a4308_0
+  - pip:
+    - certifi==2019.9.11
+    - cplex==22.1.0.0
+    - docplex==2.23.221
+    - numpy==1.23.0
+    - pyyaml==6.0
+    - six==1.12.0
+    
+prefix: /home/marc/miniconda3/envs/surrogate_bandit
