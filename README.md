@@ -9,6 +9,7 @@ conda env create --file=python_env_all_platforms.yml
 source activate surrogate_bandit 
 export PYTHONPATH="${PYTHONPATH}:{PATH_TO_CURRENT_DIRECTORY}"
 python ./scripts/comparisons.py
+python ./scripts/comparisons_smallEBL.py
 ```
 
 Use conda/pip to install other dependencies
