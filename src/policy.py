@@ -1,17 +1,11 @@
 from __future__ import annotations
-import pdb
-import copy
+from abc import ABC, abstractmethod
+from typing import Optional, Callable
 import numpy as np
 import numpy.random as nr
-from scipy.stats import norm
-from collections import namedtuple
-from abc import ABC, abstractmethod
-from typing import Callable, List, Optional
-from scipy.stats.qmc import LatinHypercube
-
-# Local Packages
+import pdb
 from src.bandit_data import BanditData
-
+from scipy.stats.qmc import LatinHypercube
 
 class DeterministicPolicy(ABC):
     @abstractmethod
@@ -24,7 +18,7 @@ class DeterministicPolicy(ABC):
 
 
 class LinearPolicy(DeterministicPolicy):
-    def __init__(self, num_actions: int, beta: Optional[List[np.ndarray]]) -> None:
+    def __init__(self, num_actions: int, beta: List[np.ndarray]) -> None:
         self._num_actions = num_actions
         self._beta = beta
 
@@ -82,6 +76,7 @@ class LinearBasket:
             beta_policy = LinearPolicy(num_actions=num_actions, beta=beta)
             basket = basket.add_policy(beta_policy)
         return basket
+
 
 class LinearBasketBinary:
     def __init__(self, basket: Optional[List[LinearPolicy]] = None) -> None:
@@ -165,8 +160,3 @@ if __name__ == "__main__":
         x_dim=x_dim
     )
     pdb.set_trace()
-
-
-
-
-

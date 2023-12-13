@@ -9,7 +9,8 @@
 # Load the require modules
 # module load Gurobi/8.11
 
-export PYTHONPATH="${PYTHONPATH}:/hpc/home/yl880/cb_surrogates"
+# export PYTHONPATH="${PYTHONPATH}:/hpc/home/yl880/cb_surrogates"
+export PYTHONPATH="${PYTHONPATH}:/Users/yinyihongliu/Desktop/pythonProject1"
 
 # source activate bandit_surrogates 
 

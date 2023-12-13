@@ -32,7 +32,7 @@ if len(sys.argv) > 1:
 print(os.getcwd())
 output_path = \
     r'C:\Users\laber\Dropbox\Tiered OutcomesFromYinyihong\code\pythonProject1\results_no_MT\\'
-n = 20
+n = 10
 p = 15
 q = 3
 num_actions = 2
@@ -59,11 +59,11 @@ gen_model = TestGenerativeModel(
     coefficients=theta,
     normal_var=normal_var,
     surrogate_var=z_var,
-    mc_iterations=10000
+    mc_iterations=100
 )
 
 ## Generate random linear policies
-num_policies = 100
+num_policies = 20
 basket = LinearBasket.generate_random_basket(
     num_policies=num_policies,
     num_actions=num_actions,
@@ -83,7 +83,7 @@ ps_eps_greedy = PolicyScreeningEpsGreedy(policies=basket)
 #ps_boot_ts = PolicyScreeningBootTS(policies=basket)
 
 # Parameters for monotonic tree emebedding
-n_trees = 100
+n_trees = 20
 n_estimators = 5
 # alphas  = alphas = np.array([.2,.8, 1, 2, 3, 5])
 # cv_folds = 5

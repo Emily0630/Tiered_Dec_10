@@ -23,7 +23,7 @@ import pandas as pd
 
 import time
 
-n = 100
+n = 5
 p = 15
 q = 3
 num_actions = 2
@@ -52,11 +52,11 @@ gen_model = CopulaGenerativeModel(
     coefficients=theta,
     normal_var=normal_var,
     surrogate_var=z_var,
-    mc_iterations=10000
+    mc_iterations=10
 )
 
 ## Generate random linear policies
-num_policies = 100
+num_policies = 5
 basket = LinearBasket.generate_random_basket(
     num_policies=num_policies,
     num_actions=num_actions,
@@ -166,16 +166,16 @@ for t in range(num_steps):
 
     # Policy Screening  Epsilon Greedy
     x = gen_model.get_context(n)
-    a = ps_eps_greedy.pick_action(x, epsilon=epsilon[t])
+    a, _ = ps_eps_greedy.pick_action(x, epsilon=epsilon[t])
     z = gen_model.get_surrogates(x, a)
     y = gen_model.get_outcome(z)
-    #average_outcome[str(ps_eps_greedy)].append(y.mean())
+    # average_outcome[str(ps_eps_greedy)].append(y.mean())
     sum_outcome[str(ps_eps_greedy)].append(y.sum())
     bandit_ps_eps.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
 
-    ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
-    print(f"Policy Screening Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
-    t1 = time.time()
+    #ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
+   # print(f"Policy Screening Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
+   # t1 = time.time()
 
     # Vanilla Boot TS
     x = gen_model.get_context(n)
