@@ -23,7 +23,7 @@ import pandas as pd
 
 import time
 
-n = 5
+n = 100
 p = 15
 q = 3
 num_actions = 2
@@ -52,11 +52,11 @@ gen_model = CopulaGenerativeModel(
     coefficients=theta,
     normal_var=normal_var,
     surrogate_var=z_var,
-    mc_iterations=10
+    mc_iterations=10000
 )
 
 ## Generate random linear policies
-num_policies = 5
+num_policies = 100
 basket = LinearBasket.generate_random_basket(
     num_policies=num_policies,
     num_actions=num_actions,
@@ -114,23 +114,23 @@ mtbtsnc = MonotoneTreeBootTS(
 )
 
 # Implement random action
-guess = RandomAction(actions=actions)
+# guess = RandomAction(actions=actions)
 
 # Define optimal policy
-gen_model.get_optimal_action()
-opt_action = np.ones(n) * gen_model.optimal_action
+# gen_model.get_optimal_action()
+# opt_action = np.ones(n) * gen_model.optimal_action
 
 #average_outcome = {str(eps_greedy): [], str(ps_eps_greedy): [], str(boot_ts): [], str(ps_boot_ts): [], str(mtbts): [], str(mtbeg): [], str(guess): [], "optimal": []}
-sum_outcome = {str(eps_greedy): [], str(ps_eps_greedy): [], str(boot_ts): [], str(ps_boot_ts): [], str(mtbeg): [],  str(mtbts): [], "mtbtsnc": [], str(guess): [], "optimal": []}
-
+#sum_outcome = {str(eps_greedy): [], str(ps_eps_greedy): [], str(boot_ts): [], str(ps_boot_ts): [], str(mtbeg): [],  str(mtbts): [], "mtbtsnc": [], str(guess): [], "optimal": []}
+sum_outcome = {str(eps_greedy): [], str(ps_eps_greedy): [], str(boot_ts): [], str(ps_boot_ts): []}
 ## Burn-in
 bandit_eps = gen_model.gen_sample(n)
 bandit_ps_eps = gen_model.gen_sample(n)
 bandit_ts = gen_model.gen_sample(n)
 bandit_ps_ts = gen_model.gen_sample(n)
-bandit_mtbeg = gen_model.gen_sample(n)
-bandit_mtbts = gen_model.gen_sample(n)
-bandit_mtbtsnc = gen_model.gen_sample(n)
+#bandit_mtbeg = gen_model.gen_sample(n)
+#bandit_mtbts = gen_model.gen_sample(n)
+#bandit_mtbtsnc = gen_model.gen_sample(n)
 bandit_guess = gen_model.gen_sample(n)
 bandit_opt = gen_model.gen_sample(n)
 
@@ -139,12 +139,12 @@ eps_greedy.update(bandit_eps)
 ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
 boot_ts.update(bandit_ts)
 ps_boot_ts.update(bandit_ps_ts, partial_order=product_order)
-mtbeg.update(bandit_mtbeg, partial_order=product_order)
-mtbts.update(bandit_mtbts, partial_order=product_order)
-mtbtsnc.update(bandit_mtbtsnc, partial_order=no_order)
+#mtbeg.update(bandit_mtbeg, partial_order=product_order)
+#mtbts.update(bandit_mtbts, partial_order=product_order)
+#mtbtsnc.update(bandit_mtbtsnc, partial_order=no_order)
 
 
-num_steps = 100
+num_steps = 5
 epsilon = .5 * np.log(np.arange(1, num_steps + 1)) / np.arange(1, num_steps + 1) ** .75
 epsilon[0] = 1
 t0 = time.time()
@@ -166,16 +166,17 @@ for t in range(num_steps):
 
     # Policy Screening  Epsilon Greedy
     x = gen_model.get_context(n)
-    a, _ = ps_eps_greedy.pick_action(x, epsilon=epsilon[t])
+    a, propensity = ps_eps_greedy.pick_action(x, epsilon=epsilon[t])
     z = gen_model.get_surrogates(x, a)
     y = gen_model.get_outcome(z)
     # average_outcome[str(ps_eps_greedy)].append(y.mean())
     sum_outcome[str(ps_eps_greedy)].append(y.sum())
-    bandit_ps_eps.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
+    # breakpoint()
+    bandit_ps_eps.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y, propensity_new=propensity)
 
-    #ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
-   # print(f"Policy Screening Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
-   # t1 = time.time()
+    ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
+    print(f"Policy Screening Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
+    t1 = time.time()
 
     # Vanilla Boot TS
     x = gen_model.get_context(n)
@@ -192,82 +193,83 @@ for t in range(num_steps):
 
     # Policy Screening Boot TS
     x = gen_model.get_context(n)
-    a = ps_boot_ts.pick_action(x, epsilon=epsilon[t])
+    a, propensity  = ps_boot_ts.pick_action(x, epsilon=epsilon[t])
     z = gen_model.get_surrogates(x, a)
     y = gen_model.get_outcome(z)
     #average_outcome[str(ps_boot_ts)].append(y.mean())
     sum_outcome[str(ps_boot_ts)].append(y.sum())
-    bandit_ps_ts.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
+    bandit_ps_ts.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y, propensity_new=propensity)
 
     ps_boot_ts.update(bandit_ps_ts, partial_order=product_order)
-    print(f"Policy Screening finish, Running Time: {time.time() - t1:.2f}")
+    print(f"Policy Screening Boot TS finish, Running Time: {time.time() - t1:.2f}")
     t1 = time.time()
 
-    # Monotone Tree Embedding Eps Greedy
-    x = gen_model.get_context(num_samples=n)
-    a = mtbeg.pick_action(x)
-    z = gen_model.get_surrogates(x, a)
+    # # Monotone Tree Embedding Eps Greedy
+    # x = gen_model.get_context(num_samples=n)
+    # a = mtbeg.pick_action(x)
+    # z = gen_model.get_surrogates(x, a)
 
-    y = gen_model.get_outcome(z)
-    #average_outcome[str(mtbeg)].append(y.mean())
-    sum_outcome[str(mtbeg)].append(y.sum())
+    # y = gen_model.get_outcome(z)
+    # #average_outcome[str(mtbeg)].append(y.mean())
+    # sum_outcome[str(mtbeg)].append(y.sum())
 
-    bandit_mtbeg = bandit_mtbeg.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
-    mtbeg.update(bandit_mtbeg, partial_order=product_order)
-    print(f"Monotone Tree Embedding Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
-    t1 = time.time()
+    # bandit_mtbeg = bandit_mtbeg.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y, propensity_new=propensity)
+    # mtbeg.update(bandit_mtbeg, partial_order=product_order)
+    # print(f"Monotone Tree Embedding Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
+    # t1 = time.time()
 
-    # Monotone Tree Embedding Boot TS
-    x = gen_model.get_context(num_samples=n)
-    a = mtbts.pick_action(x)
-    z = gen_model.get_surrogates(x, a)
+    # # Monotone Tree Embedding Boot TS
+    # x = gen_model.get_context(num_samples=n)
+    # a = mtbts.pick_action(x)
+    # z = gen_model.get_surrogates(x, a)
 
-    y = gen_model.get_outcome(z)
-    #average_outcome[str(mtbts)].append(y.mean())
-    sum_outcome[str(mtbts)].append(y.sum())
+    # y = gen_model.get_outcome(z)
+    # #average_outcome[str(mtbts)].append(y.mean())
+    # sum_outcome[str(mtbts)].append(y.sum())
 
-    bandit_mtbts = bandit_mtbts.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
-    mtbts.update(bandit_mtbts, partial_order=product_order)
-    print(f"Monotone Tree Embedding TS finish, Running Time: {time.time() - t1:.2f}")
-    t1 = time.time()
+    # bandit_mtbts = bandit_mtbts.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
+    # mtbts.update(bandit_mtbts, partial_order=product_order)
+    # print(f"Monotone Tree Embedding TS finish, Running Time: {time.time() - t1:.2f}")
+    # t1 = time.time()
 
-    # Monotone Tree Embedding Boot TS without monotone constraints
-    x = gen_model.get_context(num_samples=n)
-    a = mtbtsnc.pick_action(x)
-    z = gen_model.get_surrogates(x, a)
+    # # Monotone Tree Embedding Boot TS without monotone constraints
+    # x = gen_model.get_context(num_samples=n)
+    # a = mtbtsnc.pick_action(x)
+    # z = gen_model.get_surrogates(x, a)
 
-    y = gen_model.get_outcome(z)
-    #average_outcome[str(mtbtsnc)].append(y.mean())
-    sum_outcome["mtbtsnc"].append(y.sum())
+    # y = gen_model.get_outcome(z)
+    # #average_outcome[str(mtbtsnc)].append(y.mean())
+    # sum_outcome["mtbtsnc"].append(y.sum())
 
-    bandit_mtbtsnc = bandit_mtbtsnc.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
-    mtbtsnc.update(bandit_mtbtsnc, partial_order=no_order)
-    print(f"Monotone Tree Embedding TS no constraint finish, Running Time: {time.time() - t1:.2f}")
-    t1 = time.time()
+    # bandit_mtbtsnc = bandit_mtbtsnc.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
+    # mtbtsnc.update(bandit_mtbtsnc, partial_order=no_order)
+    # print(f"Monotone Tree Embedding TS no constraint finish, Running Time: {time.time() - t1:.2f}")
+    # t1 = time.time()
 
     # Random guess
-    a = guess.pick_action(n)
-    z = gen_model.get_surrogates(x, action=a)
-    y = gen_model.get_outcome(z)
-    #average_outcome[str(guess)].append(y.mean())
-    sum_outcome[str(guess)].append(y.sum())
-    bandit_guess = bandit_guess.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
-    print(f"Random Guess finish, Running Time: {time.time() - t1:.2f}")
-    t1 = time.time()
+    # a = guess.pick_action(n)
+    # z = gen_model.get_surrogates(x, action=a)
+    # y = gen_model.get_outcome(z)
+    # #average_outcome[str(guess)].append(y.mean())
+    # sum_outcome[str(guess)].append(y.sum())
+    # bandit_guess = bandit_guess.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
+    # print(f"Random Guess finish, Running Time: {time.time() - t1:.2f}")
+    # t1 = time.time()
 
     # True Optimal Policy
-    z = gen_model.get_surrogates(x, action=opt_action)
-    y = gen_model.get_outcome(z)
-    #average_outcome["optimal"].append(y.mean())
-    sum_outcome["optimal"].append(y.sum())
-    bandit_opt = bandit_opt.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
-    print(f"True Optimal finish, Running Time: {time.time() - t1:.2f}")
-    t1 = time.time()
+    # z = gen_model.get_surrogates(x, action=opt_action)
+    # y = gen_model.get_outcome(z)
+    # average_outcome["optimal"].append(y.mean())
+    # sum_outcome["optimal"].append(y.sum())
+    # bandit_opt = bandit_opt.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
+    # print(f"True Optimal finish, Running Time: {time.time() - t1:.2f}")
+    # t1 = time.time()
 
     print(sum_outcome)
  
     cur_time = datetime.datetime.now().replace(microsecond=0)
 
-    pd.DataFrame(sum_outcome).to_csv(f'results2/comparison_{cur_time}_{t}_{num_steps}.csv', index=False)
+    #pd.DataFrame(sum_outcome).to_csv(f'results2/comparison_{cur_time}_{t}_{num_steps}.csv', index=False)
+    pd.DataFrame(sum_outcome).to_csv(f'results_Dec10/comparison_{cur_time}_{t}_{num_steps}.csv', index=False)
     print(f"Writing result finish, Running Time: {time.time() - t1:.2f}")
 

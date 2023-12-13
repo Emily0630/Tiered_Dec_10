@@ -972,14 +972,16 @@ class PolicyScreeningEpsGreedy(PolicyScreening):
             if choose_random:
                 policy = self.random_policy()
                 new_a = policy.decision(x)
-                new_prop = epsilon/n_action
+                new_prop = epsilon[i]/n_action
 
             else:
                 new_a = self.optimal_policy.decision(x)
-                new_prop = 1-epsilon + epsilon/n_action
+                new_prop = 1-epsilon[i] + epsilon[i]/n_action
 
             new_actions.append(new_a)
             new_propensities.append(new_prop)
+        
+        # breakpoint()
 
         return np.array(new_actions), np.array(new_propensities)
 

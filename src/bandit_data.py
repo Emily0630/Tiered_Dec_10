@@ -38,8 +38,8 @@ class BanditData:
                 raise ValueError("surrogate must have same number of rows as context")
             if outcome.shape[0] != n:
                 raise ValueError("outcome must have same number of rows as context")
-            if propensity.shape[0] != n:
-                raise ValueError("propensity must have same number of rows as context")
+            #if propensity.shape[0] != n:
+                #raise ValueError("propensity must have same number of rows as context")
 
         if less_than is None:
             def z_less_than(z1, z2):
@@ -62,7 +62,6 @@ class BanditData:
             outcome_new: np.ndarray,
             propensity_new: Optional[np.ndarray] = None
     ) -> BanditData:
-        breakpoint()
         if self._context is None:
             return BanditData(context_new, action_new, surrogate_new, outcome_new, propensity_new, self._less_than)
         return BanditData(
