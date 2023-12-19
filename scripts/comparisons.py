@@ -86,32 +86,32 @@ cv_folds = None
 
 actions = np.arange(num_actions)
 
-mtbeg = MonotoneTreeBootEG(
-    actions=actions,
-    n_trees=n_trees,
-    n_estimators=n_estimators,
-    max_samples=.7,
-    model=LinearRegression,
-    alpha=.2
-)
+# mtbeg = MonotoneTreeBootEG(
+#     actions=actions,
+#     n_trees=n_trees,
+#     n_estimators=n_estimators,
+#     max_samples=.7,
+#     model=LinearRegression,
+#     alpha=.2
+# )
 
-mtbts = MonotoneTreeBootTS(
-    actions=actions,
-    n_trees=n_trees,
-    n_estimators=n_estimators,
-    max_samples=.7,
-    model=LinearRegression,
-    alpha=.2
-)
+# mtbts = MonotoneTreeBootTS(
+#     actions=actions,
+#     n_trees=n_trees,
+#     n_estimators=n_estimators,
+#     max_samples=.7,
+#     model=LinearRegression,
+#     alpha=.2
+# )
 
-mtbtsnc = MonotoneTreeBootTS(
-    actions=actions,
-    n_trees=n_trees,
-    n_estimators=n_estimators,
-    max_samples=.7,
-    model=LinearRegression,
-    alpha=.2
-)
+# mtbtsnc = MonotoneTreeBootTS(
+#     actions=actions,
+#     n_trees=n_trees,
+#     n_estimators=n_estimators,
+#     max_samples=.7,
+#     model=LinearRegression,
+#     alpha=.2
+# )
 
 # Implement random action
 # guess = RandomAction(actions=actions)
@@ -144,7 +144,7 @@ ps_boot_ts.update(bandit_ps_ts, partial_order=product_order)
 #mtbtsnc.update(bandit_mtbtsnc, partial_order=no_order)
 
 
-num_steps = 5
+num_steps = 50
 epsilon = .5 * np.log(np.arange(1, num_steps + 1)) / np.arange(1, num_steps + 1) ** .75
 epsilon[0] = 1
 t0 = time.time()
