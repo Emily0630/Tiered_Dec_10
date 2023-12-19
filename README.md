@@ -12,6 +12,9 @@ python ./scripts/comparisons.py
 python ./scripts/comparisons_smallEBL.py
 ```
 
+export PYTHONPATH="${PYTHONPATH}:/Users/yinyihongliu/Desktop/Tiered_Dec_10"
+
+
 Use conda/pip to install other dependencies
 
 Results csv files are in results2/...
@@ -25,6 +28,10 @@ source activate surrogate_bandit
 export PYTHONPATH="${PYTHONPATH}:/hpc/home/{netID}/cb_surrogates"
 sbatch shells/simulate_comparisons_48.sh
 ```
+
+ssh yl880@dcc-login.oit.duke.edu
+
+export PYTHONPATH="${PYTHONPATH}:/hpc/home/yl880/Tiered_Dec_10"
 
 Results csv files are in results2/...
 
