@@ -31,7 +31,9 @@ sbatch shells/simulate_comparisons_48.sh
 
 ssh yl880@dcc-login.oit.duke.edu
 
+source activate surrogate_bandit 
 export PYTHONPATH="${PYTHONPATH}:/hpc/home/yl880/Tiered_Dec_10"
+sbatch shells/simulate_comparisons_48.sh
 
 Results csv files are in results2/...
 
