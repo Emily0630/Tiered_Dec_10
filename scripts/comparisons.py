@@ -24,8 +24,8 @@ import pandas as pd
 import time
 
 n = 100
-p = 15
-q = 3
+p = 25
+q = 10
 num_actions = 2
 theta = list()
 theta.append(np.zeros((p, q)))
@@ -33,7 +33,7 @@ theta[0][0:4, 0] = np.array([1, 1, 2, 3])
 theta[0][4:8, 1] = np.array([-1, 1, 0.5, 0.5])
 theta[0][8:12, 2] = np.array([1, 3, -1, 1])
 theta.append(abs(theta[0]) * -10 - 10)
-ar_rho = 0.3
+ar_rho = 0.5
 g = gen_gx()
 pi = gen_pix(num_actions)
 log_normal_mean = 1.0

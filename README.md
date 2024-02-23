@@ -8,6 +8,9 @@ This repository contains the code for bandit methods using surrogate outcomes.
 conda env create --file=python_env_all_platforms.yml
 source activate surrogate_bandit 
 export PYTHONPATH="${PYTHONPATH}:{PATH_TO_CURRENT_DIRECTORY}"
+export PYTHONPATH="${PYTHONPATH}:/Users/yiyang/Desktop/Tiered_Dec_10"
+python ./scripts/comparisons_test_bandit.py
+python ./scripts/comparisons_test_bandit_optimal.py
 python ./scripts/comparisons.py
 python ./scripts/comparisons_smallEBL.py
 ```
@@ -32,8 +35,8 @@ sbatch shells/simulate_comparisons_48.sh
 ssh yl880@dcc-login.oit.duke.edu
 
 source activate surrogate_bandit 
-export PYTHONPATH="${PYTHONPATH}:/hpc/home/yl880/Tiered_Dec_10"
-sbatch shells/simulate_comparisons_48.sh
+export PYTHONPATH="${PYTHONPATH}:/hpc/home/yl880/Tiered_Dec_10_new"
+sbatch shells/comparison_night.sh
 
 Results csv files are in results2/...
 

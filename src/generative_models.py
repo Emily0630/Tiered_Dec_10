@@ -145,6 +145,54 @@ class CopulaGenerativeModel(ContextualBandit):
             ) + self._normal_sd * nr.randn(1)
 
         return outcome
+    
+    def get_direct_outcome(self, context: np.ndarray, action: Union[np.ndarray, list]) -> np.ndarray:
+        sur = self.get_surrogates(context, action)
+        outcome = self.get_outcome(sur)
+        return outcome
+    
+    def get_optimal_actions(self, context):
+        n, p = context.shape
+        actions = []
+        for i in range(n):
+            cur_context_outcome = []
+            for j in range(self._num_actions):
+                cur_action_outcome = self.get_direct_outcome(context[i:i+1,:], [j])
+                cur_context_outcome.append(cur_action_outcome)
+            cur_opt_action = np.argmax(cur_context_outcome)
+            actions.append(cur_opt_action)
+        return np.array(actions)
+    
+    def get_optimal_policy(self, bandit_data, policies):
+        bandit_context = bandit_data._context
+        policy_outcome = []
+        
+        for p in policies:
+            actions = []
+            for i, x in enumerate(bandit_context):
+                action = p.decision(x)
+                actions.append(action)
+            policy_outcome.append(self.get_direct_outcome(bandit_context, actions).sum())
+        opt_policy_index = np.argmax(policy_outcome)
+        self.opt_policy_index = opt_policy_index
+        # breakpoint()
+        self.opt_policy = policies[opt_policy_index]
+        return opt_policy_index
+    
+    def get_outcome_optimal_actions(self, context):
+        optimal_actions = self.get_optimal_actions(context)
+        outcome = self.get_direct_outcome(context, optimal_actions)
+        return outcome
+    
+    def get_outcome_optimal_policy(self, context):
+        optimal_policy = self.opt_policy
+        actions = []
+        for i, x in enumerate(context):
+            action = optimal_policy.decision(x)
+            actions.append(action)
+        outcome = self.get_direct_outcome(context, actions)
+        return outcome
+        
 
 class MonotoneGenerativeModel(ContextualBandit):
     def __init__(

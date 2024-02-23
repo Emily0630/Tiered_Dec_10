@@ -26,8 +26,8 @@ from functools import partial
 import time
 
 n = 100
-p = 15
-q = 3
+p = 25
+q = 10
 num_actions = 2
 theta = list()
 theta.append(np.zeros((p, q)))

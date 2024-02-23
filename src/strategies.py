@@ -560,7 +560,7 @@ class IpwBootTS(IPW):
                  policies: List,
                  n_jobs: int = None,
                  verbose: int = 0,
-                 replicates: int = 10000
+                 replicates: int = 10
                  ) -> None:
         super().__init__(policies, n_jobs, verbose)
 
@@ -899,10 +899,16 @@ class PolicyScreening(IPW):
             data (BanditData): bandit data.
             partial_order (Callable): a binary function that defines a partial order and evaluates whether one object is greater than another.
         """
-
+        t0 = time.time()
         self.build_constraints(data, partial_order)
+        print(f"time for building constraint: {time.time()-t0}")
+        t0 = time.time()
         self.search_non_dominated(data)
+        print(f"time for searching non-dominated: {time.time()-t0}")
+        t0 = time.time()
         self.optimal_policy = self.get_non_dominated_opt(data)
+        print(f"time for get_non_dominated_opt: {time.time()-t0}")
+        t0 = time.time()
 
 
 class PolicyScreeningEpsGreedy(PolicyScreening):
