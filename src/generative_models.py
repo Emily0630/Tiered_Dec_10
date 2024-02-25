@@ -123,7 +123,7 @@ class CopulaGenerativeModel(ContextualBandit):
 
         for i in range(num_samples):
             surrogate[i, :] = np.dot(context[i, :], self._theta[int(action[i])]) + \
-                      np.sqrt(self._surrogate_var) * nr.randn(self._surrogate_ndim)
+                      np.sqrt(self._surrogate_var) * nr.randn(self._surrogate_ndim) * 0
 
         return surrogate
 
@@ -141,8 +141,8 @@ class CopulaGenerativeModel(ContextualBandit):
                     )
                 outcome[i] += indicator * (self._monotone_func(norm.cdf(surrogate[i, j])) + (self._surrogate_ndim - j))
             outcome[i] = outcome[i] * np.exp(
-                nr.randn(1) * self._log_normal_sd + self._log_normal_mean
-            ) + self._normal_sd * nr.randn(1)
+                nr.randn(1) * self._log_normal_sd * 0 + self._log_normal_mean
+            ) + self._normal_sd * nr.randn(1) * 0
 
         return outcome
     
