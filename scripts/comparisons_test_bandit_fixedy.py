@@ -23,7 +23,7 @@ import pandas as pd
 
 import time
 
-n = 2
+n = 50
 p = 25
 q = 10
 num_actions = 2
@@ -82,7 +82,7 @@ cv_folds = None
 
 # sum_outcome = {str(eps_greedy): [], str(boot_ts): []}
 sum_outcome = {str(eps_greedy): [], str(boot_ts): [], 'RandomAction': [], 'eps_greedy_policy': [],
-               "optimal_outcome_actions":[], "optimal_policy": [], "optimal_outcome_policy":[]}
+               "optimal_outcome_actions":[]}
 ## Burn-in
 bandit_eps = gen_model.gen_sample(n)
 bandit_guess = gen_model.gen_sample(n)
@@ -94,7 +94,7 @@ boot_ts.update(bandit_ts)
 
 print(f"Optimal policy: {eps_greedy._policies._basket.index(eps_greedy.optimal_policy)}")
 print("finish initialization")
-num_steps = 500
+num_steps = 200
 epsilon = .5 * np.log(np.arange(1, num_steps + 1)) / np.arange(1, num_steps + 1) ** .75
 epsilon[0] = 1
 t0 = time.time()
@@ -138,10 +138,10 @@ for t in range(num_steps):
     # breakpoint()
     
     sum_outcome["optimal_outcome_actions"].append(gen_model.get_outcome_optimal_actions(x).sum())
-    sum_outcome["optimal_policy"].append(gen_model.get_optimal_policy(bandit_eps, basket))
-    sum_outcome["optimal_outcome_policy"].append(gen_model.get_outcome_optimal_policy(x).sum())
+    # sum_outcome["optimal_policy"].append(gen_model.get_optimal_policy(bandit_eps, basket))
+    # sum_outcome["optimal_outcome_policy"].append(gen_model.get_outcome_optimal_policy(x).sum())
 
-    if t % 1 == 0:
+    if t % 10 == 0:
         print(f"\n\nIteration {t}, Current Running Time: {time.time() - t0:.2f}")
         # print(f"Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
         print(bandit_eps._context.shape)
