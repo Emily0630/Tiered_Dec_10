@@ -11,7 +11,7 @@ export PYTHONPATH="${PYTHONPATH}:{PATH_TO_CURRENT_DIRECTORY}"
 export PYTHONPATH="${PYTHONPATH}:/Users/yiyang/Desktop/Tiered_Dec_10"
 python ./scripts/comparisons_test_bandit.py
 python ./scripts/comparisons_test_bandit_optimal.py
-python ./scripts/comparisons_test_bandit_fixedy.py
+python ./scripts/comparisons_test_bandit_ps.py
 python ./scripts/comparisons.py
 python ./scripts/comparisons_smallEBL.py
 ```
