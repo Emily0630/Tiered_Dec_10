@@ -143,6 +143,8 @@ class CopulaGenerativeModel(ContextualBandit):
             outcome[i] = outcome[i] * np.exp(
                 nr.randn(1) * self._log_normal_sd * 0 + self._log_normal_mean
             ) + self._normal_sd * nr.randn(1) * 0
+            
+        outcome = (outcome / 30) ** 3 * 30
 
         return outcome
     
@@ -196,14 +198,15 @@ class CopulaGenerativeModel(ContextualBandit):
     def evaluate_policy(self, policies, n = 100, num_iter = 100):
         outcomes = [0] * len(policies)
         for _ in range(num_iter):
-            context = self.get_context(100)
+            context = self.get_context(n)
             for i, p in enumerate(policies):
+                
                 actions = []
-                for i, x in enumerate(x):
+                for _, x in enumerate(context):
                     action = p.decision(x)
                     actions.append(action)
                 outcome = self.get_direct_outcome(context, actions)
-                outcomes[i] += outcome
+                outcomes[i] += sum(outcome)
         outcomes = np.array(outcomes)
         outcomes /= n * num_iter
         return outcomes                

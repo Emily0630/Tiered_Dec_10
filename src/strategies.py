@@ -534,20 +534,29 @@ class IpwEpsGreedy(IPW):
 
         new_actions = [] 
         propensity = []
+        policies = []
+        methods = []
         for i, x in enumerate(context):
             choose_random = npr.random() < epsilon[i]
             if choose_random:
+                method = "random"
                 policy = self.random_policy()
+                methods.append(method)
+                policies.append(policy)
                 new_a = policy.decision(x)
                 propensity.append(epsilon[i]) # probability action was assigned
 
             else:
+                method = "optimal"
+                policy = self.optimal_policy
+                policies.append(policy)
+                methods.append(method)
                 new_a = self.optimal_policy.decision(x)
                 propensity.append(1 - epsilon[i]) # probability action was assigned
 
             new_actions.append(new_a)
 
-        return np.array(new_actions), np.array(propensity)
+        return np.array(new_actions), np.array(propensity), policies, methods
 
 
 class IpwBootTS(IPW):

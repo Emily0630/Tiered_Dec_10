@@ -56,7 +56,7 @@ gen_model = CopulaGenerativeModel(
 )
 
 ## Generate random linear policies
-num_policies = 5
+num_policies = 100
 basket = LinearBasket.generate_random_basket(
     num_policies=num_policies,
     num_actions=num_actions,
@@ -77,12 +77,16 @@ boot_ts = IpwBootTS(policies=basket, replicates=2)
 alphas = .2
 cv_folds = None
 
-
-
+policy_eval = (gen_model.evaluate_policy(basket, 100, 20))
+sorted_policy_eval = sorted(policy_eval, reverse = True)
+optimal_policy = np.argmax(policy_eval)
+print(sorted_policy_eval)
+print(policy_eval)
+print(optimal_policy)
 
 # sum_outcome = {str(eps_greedy): [], str(boot_ts): []}
-sum_outcome = {str(eps_greedy): [], str(boot_ts): [], 'RandomAction': [], 'eps_greedy_policy': [],
-               "optimal_outcome_actions":[], "optimal_policy": [], "optimal_outcome_policy":[]}
+sum_outcome = {str(eps_greedy): [], str(boot_ts): [], 'RandomAction': [], 'eps_greedy_chosen_policy': [], 'eps_greedy_optimal_policy': [],
+                'eps_greedy_method': [], "eps_greedy_policy_eval":[], "optimal_policy_eval": [], "eps_greedy_policy_rank":[]}
 ## Burn-in
 bandit_eps = gen_model.gen_sample(n)
 bandit_guess = gen_model.gen_sample(n)
@@ -103,11 +107,18 @@ for t in range(num_steps):
     t1 = time.time()
     # Vanilla Epsilon Greedy
     x = gen_model.get_context(n)
-    a, propensity = eps_greedy.pick_action(context=x, epsilon=epsilon[t])
+    a, propensity, chosen_policy, method = eps_greedy.pick_action(context=x, epsilon=epsilon[t])
     z = gen_model.get_surrogates(x, a)
     y = gen_model.get_outcome(z)
     sum_outcome[str(eps_greedy)].append(y.sum())
-    sum_outcome["eps_greedy_policy"].append(eps_greedy._policies._basket.index(eps_greedy.optimal_policy))
+    chosen_policy_index = [eps_greedy._policies._basket.index(p) for p in chosen_policy]
+    policy_index = eps_greedy._policies._basket.index(eps_greedy.optimal_policy)
+    sum_outcome["eps_greedy_method"].append(method)
+    sum_outcome["eps_greedy_chosen_policy"].append(chosen_policy_index)
+    sum_outcome["eps_greedy_optimal_policy"].append(policy_index)
+    sum_outcome["eps_greedy_policy_eval"].append(policy_eval[policy_index])
+    sum_outcome["optimal_policy_eval"].append(sorted_policy_eval[0])
+    sum_outcome["eps_greedy_policy_rank"].append(np.where(sorted_policy_eval == policy_eval[policy_index])[0][0] + 1)
     bandit_eps = bandit_eps.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y, propensity_new=propensity)
 
     eps_greedy.update(bandit_eps)
@@ -137,15 +148,15 @@ for t in range(num_steps):
     
     # breakpoint()
     
-    sum_outcome["optimal_outcome_actions"].append(gen_model.get_outcome_optimal_actions(x).sum())
-    sum_outcome["optimal_policy"].append(gen_model.get_optimal_policy(bandit_eps, basket))
-    sum_outcome["optimal_outcome_policy"].append(gen_model.get_outcome_optimal_policy(x).sum())
+    # sum_outcome["optimal_outcome_actions"].append(gen_model.get_outcome_optimal_actions(x).sum())
+    # sum_outcome["optimal_policy"].append(gen_model.get_optimal_policy(bandit_eps, basket))
+    # sum_outcome["optimal_outcome_policy"].append(gen_model.get_outcome_optimal_policy(x).sum())
 
     if t % 1 == 0:
         print(f"\n\nIteration {t}, Current Running Time: {time.time() - t0:.2f}")
         # print(f"Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
         print(bandit_eps._context.shape)
-        print(sum_outcome)
+        # print(sum_outcome)
         pd.DataFrame(sum_outcome).to_csv(f'results_temp/comparison_policycomp_{num_steps}.csv', index=False)
         # breakpoint()
         print(f"Optimal policy: {eps_greedy._policies._basket.index(eps_greedy.optimal_policy)}")
