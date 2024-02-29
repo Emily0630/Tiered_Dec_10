@@ -23,7 +23,7 @@ import pandas as pd
 
 import time
 
-n = 5
+n = 100
 p = 25
 q = 10
 num_actions = 2
@@ -56,21 +56,18 @@ gen_model = CopulaGenerativeModel(
 )
 
 ## Generate random linear policies
-num_policies = 50
+num_policies = 5
 basket = LinearBasket.generate_random_basket(
     num_policies=num_policies,
     num_actions=num_actions,
     x_dim=p
 )
 
-
 actions = np.arange(num_actions)
 
 
 # Vanilla Epsilon Greedy
 eps_greedy = IpwEpsGreedy(policies=basket)
-
-ps_eps_greedy = PolicyScreeningEpsGreedy(policies=basket)
 
 guess = RandomAction(actions=actions)
 
@@ -85,24 +82,21 @@ cv_folds = None
 
 # sum_outcome = {str(eps_greedy): [], str(boot_ts): []}
 sum_outcome = {str(eps_greedy): [], str(boot_ts): [], 'RandomAction': [], 'eps_greedy_policy': [],
-               "optimal_outcome_actions":[], str(ps_eps_greedy): [], "non_dominated": []}
+               "optimal_outcome_actions":[], "optimal_policy": [], "optimal_outcome_policy":[]}
 ## Burn-in
 bandit_eps = gen_model.gen_sample(n)
 bandit_guess = gen_model.gen_sample(n)
 bandit_ts = gen_model.gen_sample(n)
-bandit_ps_eps = gen_model.gen_sample(n)
 # print(f"Optimal policy: {eps_greedy._policies._basket.index(eps_greedy.optimal_policy)}")
 ## Initialize agents
 eps_greedy.update(bandit_eps)
 boot_ts.update(bandit_ts)
-ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
 
 print(f"Optimal policy: {eps_greedy._policies._basket.index(eps_greedy.optimal_policy)}")
 print("finish initialization")
-num_steps = 200
+num_steps = 500
 epsilon = .5 * np.log(np.arange(1, num_steps + 1)) / np.arange(1, num_steps + 1) ** .75
 epsilon[0] = 1
-epsilon *= 0
 t0 = time.time()
 for t in range(num_steps):
     
@@ -141,33 +135,18 @@ for t in range(num_steps):
     bandit_guess = bandit_guess.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y)
     t1 = time.time()
     
-    # Policy Screening Epsilon Greedy
-    x = gen_model.get_context(n)
-    a, propensity = ps_eps_greedy.pick_action(x, epsilon=epsilon[t])
-    z = gen_model.get_surrogates(x, a)
-    y = gen_model.get_outcome(z)
-    # average_outcome[str(ps_eps_greedy)].append(y.mean())
-    sum_outcome[str(ps_eps_greedy)].append(y.sum())
-    sum_outcome["non_dominated"].append(ps_eps_greedy._non_dominated_indices)
-    # breakpoint()
-    bandit_ps_eps = bandit_ps_eps.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y, propensity_new=propensity)
-
-    ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
-    print(f"Policy Screening Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
-    t1 = time.time()
-    
     # breakpoint()
     
     sum_outcome["optimal_outcome_actions"].append(gen_model.get_outcome_optimal_actions(x).sum())
-    # sum_outcome["optimal_policy"].append(gen_model.get_optimal_policy(bandit_eps, basket))
-    # sum_outcome["optimal_outcome_policy"].append(gen_model.get_outcome_optimal_policy(x).sum())
+    sum_outcome["optimal_policy"].append(gen_model.get_optimal_policy(bandit_eps, basket))
+    sum_outcome["optimal_outcome_policy"].append(gen_model.get_outcome_optimal_policy(x).sum())
 
     if t % 1 == 0:
         print(f"\n\nIteration {t}, Current Running Time: {time.time() - t0:.2f}")
         # print(f"Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
-        # print(bandit_eps._context.shape)
-        # print(sum_outcome)
-        pd.DataFrame(sum_outcome).to_csv(f'results_temp/comparison_ps_{num_steps}.csv', index=False)
+        print(bandit_eps._context.shape)
+        print(sum_outcome)
+        pd.DataFrame(sum_outcome).to_csv(f'results_temp/comparison_policycomp_{num_steps}.csv', index=False)
         # breakpoint()
-        # print(f"Optimal policy: {eps_greedy._policies._basket.index(eps_greedy.optimal_policy)}")
+        print(f"Optimal policy: {eps_greedy._policies._basket.index(eps_greedy.optimal_policy)}")
 

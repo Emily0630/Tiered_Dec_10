@@ -192,6 +192,21 @@ class CopulaGenerativeModel(ContextualBandit):
             actions.append(action)
         outcome = self.get_direct_outcome(context, actions)
         return outcome
+    
+    def evaluate_policy(self, policies, n = 100, num_iter = 100):
+        outcomes = [0] * len(policies)
+        for _ in range(num_iter):
+            context = self.get_context(100)
+            for i, p in enumerate(policies):
+                actions = []
+                for i, x in enumerate(x):
+                    action = p.decision(x)
+                    actions.append(action)
+                outcome = self.get_direct_outcome(context, actions)
+                outcomes[i] += outcome
+        outcomes = np.array(outcomes)
+        outcomes /= n * num_iter
+        return outcomes                
         
 
 class MonotoneGenerativeModel(ContextualBandit):
