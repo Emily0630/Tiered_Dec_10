@@ -56,7 +56,7 @@ gen_model = CopulaGenerativeModel(
 )
 
 ## Generate random linear policies
-num_policies = 100
+num_policies = 20
 basket = LinearBasket.generate_random_basket(
     num_policies=num_policies,
     num_actions=num_actions,
@@ -68,6 +68,8 @@ actions = np.arange(num_actions)
 
 # Vanilla Epsilon Greedy
 eps_greedy = IpwEpsGreedy(policies=basket)
+
+ps_eps_greedy = PolicyScreeningEpsGreedy(policies=basket)
 
 guess = RandomAction(actions=actions)
 
@@ -91,10 +93,12 @@ sum_outcome = {str(eps_greedy): [], str(boot_ts): [], 'RandomAction': [], 'eps_g
 bandit_eps = gen_model.gen_sample(n)
 bandit_guess = gen_model.gen_sample(n)
 bandit_ts = gen_model.gen_sample(n)
+bandit_ps_eps = gen_model.gen_sample(n)
 # print(f"Optimal policy: {eps_greedy._policies._basket.index(eps_greedy.optimal_policy)}")
 ## Initialize agents
 eps_greedy.update(bandit_eps)
 boot_ts.update(bandit_ts)
+ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
 
 print(f"Optimal policy: {eps_greedy._policies._basket.index(eps_greedy.optimal_policy)}")
 print("finish initialization")
@@ -135,6 +139,21 @@ for t in range(num_steps):
 
     boot_ts.update(bandit_ts)
     print(f"Vanilla Boot TS finish, Running Time: {time.time() - t1:.2f}")
+    t1 = time.time()
+    
+    # Policy Screening Epsilon Greedy
+    x = gen_model.get_context(n)
+    a, propensity = ps_eps_greedy.pick_action(x, epsilon=epsilon[t])
+    z = gen_model.get_surrogates(x, a)
+    y = gen_model.get_outcome(z)
+    # average_outcome[str(ps_eps_greedy)].append(y.mean())
+    sum_outcome[str(ps_eps_greedy)].append(y.sum())
+    sum_outcome["non_dominated"].append(ps_eps_greedy._non_dominated_indices)
+    # breakpoint()
+    bandit_ps_eps = bandit_ps_eps.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y, propensity_new=propensity)
+
+    ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
+    print(f"Policy Screening Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
     t1 = time.time()
     
     # Random guess
