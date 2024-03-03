@@ -1094,7 +1094,8 @@ class PolicyScreeningBootTS(PolicyScreening):
         new_propensities = []
         for i, x in enumerate(X):
             choose_random = npr.random() < epsilon[i]
-            if choose_random and False: # no additional explore
+            # if choose_random and False: # no additional explore
+            if choose_random:
                 new_a = self.optimal_policy.decision(x)
 
             else:
