@@ -23,7 +23,7 @@ import pandas as pd
 
 import time
 
-n = 100
+n = 2
 p = 25
 q = 10
 num_actions = 2
@@ -56,7 +56,7 @@ gen_model = CopulaGenerativeModel(
 )
 
 ## Generate random linear policies
-num_policies = 20
+num_policies = 5
 basket = LinearBasket.generate_random_basket(
     num_policies=num_policies,
     num_actions=num_actions,
@@ -79,7 +79,7 @@ boot_ts = IpwBootTS(policies=basket, replicates=2)
 alphas = .2
 cv_folds = None
 
-policy_eval = (gen_model.evaluate_policy(basket, 100, 20))
+policy_eval = (gen_model.evaluate_policy(basket, 5, 20))
 sorted_policy_eval = sorted(policy_eval, reverse = True)
 optimal_policy = np.argmax(policy_eval)
 print(sorted_policy_eval)
@@ -88,7 +88,8 @@ print(optimal_policy)
 
 # sum_outcome = {str(eps_greedy): [], str(boot_ts): []}
 sum_outcome = {str(eps_greedy): [], str(boot_ts): [], 'RandomAction': [], 'eps_greedy_chosen_policy': [], 'eps_greedy_optimal_policy': [],
-                'eps_greedy_method': [], "eps_greedy_policy_eval":[], "optimal_policy_eval": [], "eps_greedy_policy_rank":[]}
+                'eps_greedy_method': [], "eps_greedy_policy_eval":[], "optimal_policy_eval": [], "eps_greedy_policy_rank":[],
+                str(ps_eps_greedy):[] , "non_dominated":[]}
 ## Burn-in
 bandit_eps = gen_model.gen_sample(n)
 bandit_guess = gen_model.gen_sample(n)
