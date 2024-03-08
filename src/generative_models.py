@@ -163,17 +163,18 @@ class CopulaGenerativeModel(ContextualBandit):
             actions.append(cur_opt_action)
         return np.array(actions)
     
-    def get_optimal_policy(self, bandit_data, policies):
-        bandit_context = bandit_data._context
+    def get_optimal_policy(self, policies, num_samples = 1000):
+        context = rmvnorm(num_samples, rho=self._autoregressive_cov, dim=self._context_ndim)
         policy_outcome = []
         
         for p in policies:
             actions = []
-            for i, x in enumerate(bandit_context):
+            for i, x in enumerate(context):
                 action = p.decision(x)
                 actions.append(action)
-            policy_outcome.append(self.get_direct_outcome(bandit_context, actions).sum())
+            policy_outcome.append(self.get_direct_outcome(context, actions).sum())
         opt_policy_index = np.argmax(policy_outcome)
+        self.policy_true_value = np.array(policy_outcome) / num_samples
         self.opt_policy_index = opt_policy_index
         # breakpoint()
         self.opt_policy = policies[opt_policy_index]

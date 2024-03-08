@@ -55,6 +55,8 @@ gen_model = CopulaGenerativeModel(
     mc_iterations=10000
 )
 
+
+
 ## Generate random linear policies
 num_policies = 100
 basket = LinearBasket.generate_random_basket(
@@ -62,6 +64,9 @@ basket = LinearBasket.generate_random_basket(
     num_actions=num_actions,
     x_dim=p
 )
+
+gen_model.get_optimal_policy(basket, num_samples = 2000)
+
 
 actions = np.arange(num_actions)
 
@@ -82,7 +87,7 @@ cv_folds = None
 
 # sum_outcome = {str(eps_greedy): [], str(boot_ts): []}
 sum_outcome = {str(eps_greedy): [], str(boot_ts): [], 'RandomAction': [], 'eps_greedy_policy': [],
-               "optimal_outcome_actions":[]}
+               "optimal_outcome_actions":[], "opt_policy_index": [], "optimal_outcome_policy": []}
 ## Burn-in
 bandit_eps = gen_model.gen_sample(n)
 bandit_guess = gen_model.gen_sample(n)
@@ -95,8 +100,10 @@ boot_ts.update(bandit_ts)
 print(f"Optimal policy: {eps_greedy._policies._basket.index(eps_greedy.optimal_policy)}")
 print("finish initialization")
 num_steps = 200
-epsilon = .5 * np.log(np.arange(1, num_steps + 1)) / np.arange(1, num_steps + 1) ** .75
+# epsilon = .5 * np.log(np.arange(1, num_steps + 1)) / np.arange(1, num_steps + 1) ** .75
+epsilon = 1 / np.arange(1, num_steps + 1) ** 1.25
 epsilon[0] = 1
+breakpoint()
 t0 = time.time()
 for t in range(num_steps):
     
@@ -138,8 +145,8 @@ for t in range(num_steps):
     # breakpoint()
     
     sum_outcome["optimal_outcome_actions"].append(gen_model.get_outcome_optimal_actions(x).sum())
-    # sum_outcome["optimal_policy"].append(gen_model.get_optimal_policy(bandit_eps, basket))
-    # sum_outcome["optimal_outcome_policy"].append(gen_model.get_outcome_optimal_policy(x).sum())
+    sum_outcome["opt_policy_index"].append(gen_model.opt_policy_index)
+    sum_outcome["optimal_outcome_policy"].append(gen_model.get_outcome_optimal_policy(x).sum())
 
     if t % 10 == 0:
         print(f"\n\nIteration {t}, Current Running Time: {time.time() - t0:.2f}")
