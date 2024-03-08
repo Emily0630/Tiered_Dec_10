@@ -86,8 +86,8 @@ cv_folds = None
 
 
 # sum_outcome = {str(eps_greedy): [], str(boot_ts): []}
-sum_outcome = {str(eps_greedy): [], str(boot_ts): [], 'RandomAction': [], 'eps_greedy_policy': [],
-               "optimal_outcome_actions":[], "opt_policy_index": [], "optimal_outcome_policy": []}
+sum_outcome = {str(eps_greedy): [], str(boot_ts): [], 'RandomAction': [], 'eps_greedy_policy': [], 'eps_greedy_value': [],
+               "optimal_outcome_actions":[], "opt_policy_index": [], 'opt_policy_value': [], "optimal_outcome_policy": []}
 ## Burn-in
 bandit_eps = gen_model.gen_sample(n)
 bandit_guess = gen_model.gen_sample(n)
@@ -103,7 +103,6 @@ num_steps = 200
 # epsilon = .5 * np.log(np.arange(1, num_steps + 1)) / np.arange(1, num_steps + 1) ** .75
 epsilon = 1 / np.arange(1, num_steps + 1) ** 1.25
 epsilon[0] = 1
-breakpoint()
 t0 = time.time()
 for t in range(num_steps):
     
@@ -115,6 +114,7 @@ for t in range(num_steps):
     y = gen_model.get_outcome(z)
     sum_outcome[str(eps_greedy)].append(y.sum())
     sum_outcome["eps_greedy_policy"].append(eps_greedy._policies._basket.index(eps_greedy.optimal_policy))
+    sum_outcome["eps_greedy_value"].append(gen_model.policy_true_value[eps_greedy._policies._basket.index(eps_greedy.optimal_policy)])
     bandit_eps = bandit_eps.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y, propensity_new=propensity)
 
     eps_greedy.update(bandit_eps)
@@ -146,9 +146,10 @@ for t in range(num_steps):
     
     sum_outcome["optimal_outcome_actions"].append(gen_model.get_outcome_optimal_actions(x).sum())
     sum_outcome["opt_policy_index"].append(gen_model.opt_policy_index)
+    sum_outcome["opt_policy_value"].append(gen_model.policy_true_value[gen_model.opt_policy_index])
     sum_outcome["optimal_outcome_policy"].append(gen_model.get_outcome_optimal_policy(x).sum())
-
-    if t % 10 == 0:
+    
+    if t % 1 == 0:
         print(f"\n\nIteration {t}, Current Running Time: {time.time() - t0:.2f}")
         # print(f"Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
         print(bandit_eps._context.shape)
