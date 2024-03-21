@@ -99,9 +99,10 @@ ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
 print(f"Optimal policy: {eps_greedy._policies._basket.index(eps_greedy.optimal_policy)}")
 print("finish initialization")
 num_steps = 50
-epsilon = .5 * np.log(np.arange(1, num_steps + 1)) / np.arange(1, num_steps + 1) ** .75
+#epsilon = .5 * np.log(np.arange(1, num_steps + 1)) / np.arange(1, num_steps + 1) ** .75
+epsilon = 1 / np.arange(1, num_steps + 1) ** 1.25
 epsilon[0] = 1
-epsilon *= 0
+#epsilon *= 0
 t0 = time.time()
 for t in range(num_steps):
     

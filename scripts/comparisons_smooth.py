@@ -90,6 +90,7 @@ ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
 num_steps = 50
 epsilon = .5 * np.log(np.arange(1, num_steps + 1)) / np.arange(1, num_steps + 1) ** .75
 epsilon[0] = 1
+epsilon *= 0
 t0 = time.time()
 for t in range(num_steps):
     print(f"\n\nIteration {t}, Current Running Time: {time.time() - t0:.2f}")
@@ -101,7 +102,7 @@ for t in range(num_steps):
     y = gen_model.get_outcome(z)
     #average_outcome[str(eps_greedy)].append(y.mean())
     sum_outcome[str(eps_greedy)].append(y.sum())
-    bandit_eps.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y, propensity_new=propensity)
+    bandit_eps = bandit_eps.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y, propensity_new=propensity)
 
     eps_greedy.update(bandit_eps)
     print(f"Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
@@ -115,7 +116,7 @@ for t in range(num_steps):
     # average_outcome[str(ps_eps_greedy)].append(y.mean())
     sum_outcome[str(ps_eps_greedy)].append(y.sum())
     # breakpoint()
-    bandit_ps_eps.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y, propensity_new=propensity)
+    bandit_ps_eps = bandit_ps_eps.add_observations(context_new=x, action_new=a, surrogate_new=z, outcome_new=y, propensity_new=propensity)
 
     ps_eps_greedy.update(bandit_ps_eps, partial_order=product_order)
     print(f"Policy Screening Epsilon Greedy finish, Running Time: {time.time() - t1:.2f}")
