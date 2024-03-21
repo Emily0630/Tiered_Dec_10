@@ -130,8 +130,8 @@ def gurobi_check_is_dominated(
     min_model.setObjective(delta @ x, GRB.MINIMIZE)
     min_model.addConstr(a_matrix @ x <= h_matrix)
     min_model.addConstr(np.ones(len(delta)) @ x >= 1)
-    if s_matrix is not None:
-        min_model.addConstr(s_matrix @ x <= s_vector)
+    #if s_matrix is not None:
+    #    min_model.addConstr(s_matrix @ x <= s_vector)
     min_model.optimize()
     min_model_value = min_model.ObjVal
 
