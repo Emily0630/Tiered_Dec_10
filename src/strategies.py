@@ -725,6 +725,7 @@ class PolicyScreening(IPW):
                 dij = np.linalg.norm(
                     data._surrogate[i, :] - data._surrogate[j, :]
                 )
+                #breakpoint()
 
                 self._smoothness_matrix[smoothness_counter, i] = 1
                 self._smoothness_matrix[smoothness_counter, j] = -1
@@ -797,6 +798,7 @@ class PolicyScreening(IPW):
                     self._smoothness_matrix,
                     self._smoothness_vector
                 )
+                #breakpoint()
                 if i_is_dominated:
                     non_dominated_indices.remove(i)
                     break
