@@ -65,7 +65,7 @@ basket = LinearBasket.generate_random_basket(
     x_dim=p
 )
 
-gen_model.get_optimal_policy(basket, num_samples = 2000)
+gen_model.get_optimal_policy(basket, num_samples = 10000)
 
 
 actions = np.arange(num_actions)
